@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Courses | LearnHub{% endblock %}
+{% block content %}
+<section class="page-head"><span class="eyebrow">LEARNING LIBRARY</span><h1>Explore all courses</h1><p>Search a topic or filter by category.</p></section>
+<section class="filter-box"><form action="{{ url_for('courses') }}" class="filter-form"><input name="q" value="{{ q }}" placeholder="Search courses..." /><select name="category"><option value="All">All Categories</option>{% for c in categories %}<option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}</select><button class="btn" type="submit">Search</button></form></section>
+<section class="section compact">{% if courses %}<div class="course-grid">{% for course in courses %}<article class="course-card">
+<div class="course-icon">{{ category_icon(course["category"]) }}</div>
+<div class="course-body">
+<span class="pill">{{ course["category"] }}</span>
+<h3>{{ course["name"] }}</h3>
+<p>{{ course["description"] }}</p>
+<div class="meta"><span>{{ course["difficulty"] or "Beginner" }}</span><span>{{ course["duration"] or "Self-paced" }}</span><span>⭐ {{ "%.1f"|format(course["rating"] or 0) }}</span></div>
+{% if course["recommendation_reason"] is defined %}<div class="reason">🤖 {{ course["recommendation_reason"] }}</div>{% endif %}
+<a class="btn" href="{{ url_for('course_details', course_id=course['course_id']) }}">View Course</a>
+</div>
+</article>{% endfor %}</div>{% else %}<div class="empty"><div class="empty-icon">⌕</div><h2>No courses found</h2><p>Try another keyword or category.</p></div>{% endif %}</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}My Learning | LearnHub{% endblock %}
+{% block content %}
+<section class="page-head dashboard-head"><span class="eyebrow">PERSONAL DASHBOARD</span><h1>Welcome back, {{ session.get('user_name') }} 👋</h1><p>Your activity signals are used to personalize what you see next.</p></section>
+
+<section class="stats-grid"><div class="stat"><b>{{ viewed }}</b><span>Views</span></div><div class="stat"><b>{{ enrolled }}</b><span>Enrolled</span></div><div class="stat"><b>{{ completed }}</b><span>Completed</span></div><div class="stat"><b>{{ favorites_count }}</b><span>Saved</span></div></section>
+
+{% if interests %}
+<section class="section">
+<div class="section-heading"><div><span class="eyebrow">USER PROFILE</span><h2>What you're interested in</h2></div></div>
+<div class="interest-grid">{% for item in interests %}<div class="interest"><div><b>{{ item.category }}</b><span>{{ item.score }} pts</span></div><div class="bar"><i style="width: {{ [item.score * 8, 100]|min }}%"></i></div><small>{{ item.views }} view{{ '' if item.views == 1 else 's' }}</small></div>{% endfor %}</div>
+</section>
+{% endif %}
+
+<section class="section tinted"><div class="section-heading"><div><span class="eyebrow">AI FEED</span><h2>Recommended For You</h2></div><a href="{{ url_for('recommendations') }}">See all →</a></div><div class="course-grid">{% for course in recommendations %}<article class="course-card">
+<div class="course-icon">{{ category_icon(course["category"]) }}</div>
+<div class="course-body">
+<span class="pill">{{ course["category"] }}</span>
+<h3>{{ course["name"] }}</h3>
+<p>{{ course["description"] }}</p>
+<div class="meta"><span>{{ course["difficulty"] or "Beginner" }}</span><span>{{ course["duration"] or "Self-paced" }}</span><span>⭐ {{ "%.1f"|format(course["rating"] or 0) }}</span></div>
+{% if course["recommendation_reason"] is defined %}<div class="reason">🤖 {{ course["recommendation_reason"] }}</div>{% endif %}
+<a class="btn" href="{{ url_for('course_details', course_id=course['course_id']) }}">View Course</a>
+</div>
+</article>{% endfor %}</div></section>
+
+<section class="split-grid section">
+<div><div class="section-heading"><div><span class="eyebrow">CONTINUE</span><h2>Recently Viewed</h2></div></div>{% for course in recent %}<a class="list-card" href="{{ url_for('course_details', course_id=course['course_id']) }}"><span>{{ category_icon(course["category"]) }}</span><div><b>{{ course["name"] }}</b><small>{{ course["category"] }}</small></div><strong>→</strong></a>{% else %}<div class="empty small"><p>No activity yet.</p></div>{% endfor %}</div>
+<div><div class="section-heading"><div><span class="eyebrow">SAVED</span><h2>My Favourites</h2></div></div>{% for course in favorites %}<a class="list-card" href="{{ url_for('course_details', course_id=course['course_id']) }}"><span>♥</span><div><b>{{ course["name"] }}</b><small>{{ course["category"] }}</small></div><strong>Open →</strong></a>{% else %}<div class="empty small"><p>Save courses you want to revisit.</p></div>{% endfor %}</div>
+</section>
+
+<section class="section">
+<div class="section-heading"><div><span class="eyebrow">MY LEARNING</span><h2>Enrolled Courses</h2></div></div>
+{% for course in learning %}<a class="list-card" href="{{ url_for('course_details', course_id=course['course_id']) }}"><span>{{ category_icon(course["category"]) }}</span><div><b>{{ course["name"] }}</b><small>{{ course["difficulty"] }}</small></div><strong>Continue →</strong></a>{% else %}<div class="empty small"><p>Enroll in a course to see it here.</p></div>{% endfor %}
+</section>
+{% endblock %}

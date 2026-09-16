@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}For You | LearnHub{% endblock %}
+{% block content %}
+<section class="page-head"><span class="eyebrow">HYBRID RECOMMENDATION ENGINE</span><h1>Made for your learning journey.</h1><p>Recommendations combine course-content similarity, your behaviour signals and course quality.</p></section>
+{% if interests %}<div class="interest-banner"><strong>Your top interests</strong>{% for item in interests[:4] %}<span>{{ item.category }} · {{ item.score }} pts</span>{% endfor %}</div>{% endif %}
+<section class="section"><div class="section-heading"><div><span class="eyebrow">PERSONALIZED</span><h2>Recommended for You</h2></div><span class="model-badge">TF-IDF + Behaviour + Rating</span></div>
+<div class="course-grid">{% for course in recommendations %}
+<article class="course-card"><div class="course-icon">{{ category_icon(course["category"]) }}</div><div class="course-body"><span class="pill">{{ course["category"] }}</span><h3>{{ course["name"] }}</h3><p>{{ course["description"] }}</p><div class="score-line"><span>Recommendation score</span><b>{{ course["recommendation_score"] }}%</b></div><div class="bar"><i style="width: {{ [course['recommendation_score'], 100]|min }}%"></i></div><div class="reason">🤖 {{ course["recommendation_reason"] }}</div><a class="btn" href="{{ url_for('course_details', course_id=course['course_id']) }}">View Course</a></div></article>
+{% else %}<div class="empty"><h2>Explore a few courses first</h2><p>Your personalized feed will appear after the system gets some signals.</p></div>{% endfor %}</div></section>
+{% endblock %}

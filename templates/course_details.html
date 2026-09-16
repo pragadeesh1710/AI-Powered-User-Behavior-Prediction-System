@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ course["name"] }} | LearnHub{% endblock %}
+{% block content %}
+<section class="course-detail">
+<div class="detail-main" data-course-id="{{ course['course_id'] }}">
+<div class="detail-icon">{{ category_icon(course["category"]) }}</div>
+<span class="pill">{{ course["category"] }}</span>
+<h1>{{ course["name"] }}</h1>
+<p class="lead">{{ course["description"] }}</p>
+<div class="detail-meta"><span>Level: <b>{{ course["difficulty"] or "Beginner" }}</b></span><span>Duration: <b>{{ course["duration"] or "Self-paced" }}</b></span><span>Rating: <b>⭐ {{ "%.1f"|format(course["rating"] or 0) }}</b></span></div>
+
+{% if session.get('user_id') %}
+<div class="action-box">
+<form method="POST" action="{{ url_for('enroll', course_id=course['course_id']) }}"><button class="btn" type="submit">Enroll</button></form>
+<form method="POST" action="{{ url_for('favorite', course_id=course['course_id']) }}"><button class="btn btn-outline" type="submit">{{ "♥ Saved" if favorite else "♡ Save" }}</button></form>
+<form method="POST" action="{{ url_for('complete', course_id=course['course_id']) }}"><button class="btn btn-outline" type="submit">Mark Completed</button></form>
+</div>
+
+<div class="rating-box"><div><b>Rate this course</b><span>{% if user_rating %}Your rating: {{ user_rating }}/5{% endif %}</span></div><form method="POST" action="{{ url_for('rate', course_id=course['course_id']) }}" class="stars">{% for i in range(1,6) %}<button type="submit" name="rating" value="{{ i }}" title="{{ i }} stars">{{ "★" if user_rating and i <= user_rating else "☆" }}</button>{% endfor %}</form></div>
+
+<div class="time-box"><span>⏱️ Your learning time on this page</span><b id="timeSpent">0m 0s</b></div>
+{% else %}
+<div class="why-box"><strong>Build a personalized feed</strong><p>Log in and interact with courses. LearnHub uses your behaviour as recommendation signals.</p><a class="btn" href="{{ url_for('login') }}">Log In</a></div>
+{% endif %}
+</div>
+
+<aside class="detail-side">
+<h3>Similar Courses</h3>
+<p class="muted">Based on course content and topic similarity.</p>
+{% for item in related %}
+<a class="related-item" href="{{ url_for('course_details', course_id=item['course_id']) }}"><span>{{ category_icon(item["category"]) }}</span><div><b>{{ item["name"] }}</b><small>{{ item["category"] }} · {{ item["similarity"] }}% similar</small></div></a>
+{% else %}<p class="muted">No related courses yet.</p>{% endfor %}
+</aside>
+</section>
+
+{% if session.get('user_id') %}
+<script>
+(function () {
+    const page = document.querySelector(".detail-main");
+    if (!page) return;
+    const courseId = page.dataset.courseId;
+    let unsent = 0;
+    let displayed = 0;
+
+    function sendTime() {
+        if (unsent <= 0) return;
+        const amount = Math.min(unsent, 120);
+        unsent -= amount;
+        fetch(`/api/course/${courseId}/time`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({seconds: amount}),
+            keepalive: true
+        }).catch(() => { unsent += amount; });
+    }
+
+    setInterval(function () {
+        unsent += 10;
+        displayed += 10;
+        const m = Math.floor(displayed / 60);
+        const s = displayed % 60;
+        document.getElementById("timeSpent").textContent = `${m}m ${s}s`;
+        if (unsent >= 30) sendTime();
+    }, 10000);
+
+    window.addEventListener("beforeunload", sendTime);
+})();
+</script>
+{% endif %}
+{% endblock %}
