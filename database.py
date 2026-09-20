@@ -1,6 +1,7 @@
 import sqlite3
+import os
 
-DATABASE_NAME = "database.db"
+DATABASE_NAME = os.path.join("/tmp", "database.db")
 
 
 def get_connection():
