@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}LearnHub | Personalized Learning{% endblock %}
+{% block content %}
+<section class="hero">
+<div class="hero-copy">
+<span class="eyebrow">PERSONALIZED LEARNING</span>
+<h1>Discover courses<br><span>made for you.</span></h1>
+<p>Explore, learn and build your skills. Your activity helps LearnHub understand your interests and personalize your learning feed.</p>
+<form class="search-large" action="{{ url_for('courses') }}"><input name="q" placeholder="Search Python, Machine Learning, Data Science..." /><button class="btn" type="submit">Search</button></form>
+</div>
+<div class="hero-stat">
+<div class="stat-orbit">✦</div>
+<h3>Smart recommendations</h3>
+<p>Searches, views, enrollments, favourites, ratings and learning time become signals for your personalized feed.</p>
+<div class="signal-row"><span>Search</span><span>View</span><span>Learn</span><span>Recommend</span></div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-heading"><div><span class="eyebrow">EXPLORE</span><h2>Browse by interest</h2></div><a href="{{ url_for('courses') }}">View all →</a></div>
+<div class="category-row">{% for category in categories %}<a class="category-chip" href="{{ url_for('courses', category=category) }}">{{ category }}</a>{% endfor %}</div>
+</section>
+
+{% if session.get('user_id') %}
+<section class="section tinted">
+<div class="section-heading"><div><span class="eyebrow">YOUR FEED</span><h2>Recommended for You</h2></div><a href="{{ url_for('recommendations') }}">See all →</a></div>
+<div class="course-grid">{% for course in recommendations %}<article class="course-card">
+<div class="course-icon">{{ category_icon(course["category"]) }}</div>
+<div class="course-body">
+<span class="pill">{{ course["category"] }}</span>
+<h3>{{ course["name"] }}</h3>
+<p>{{ course["description"] }}</p>
+<div class="meta"><span>{{ course["difficulty"] or "Beginner" }}</span><span>{{ course["duration"] or "Self-paced" }}</span><span>⭐ {{ "%.1f"|format(course["rating"] or 0) }}</span></div>
+{% if course["recommendation_reason"] is defined %}<div class="reason">🤖 {{ course["recommendation_reason"] }}</div>{% endif %}
+<a class="btn" href="{{ url_for('course_details', course_id=course['course_id']) }}">View Course</a>
+</div>
+</article>{% endfor %}</div>
+</section>
+{% else %}
+<section class="section tinted">
+<div class="feature-banner"><div><span class="eyebrow">HOW IT WORKS</span><h2>Your activity shapes your feed.</h2><p>Once you create an account, the system learns from the courses you search, view, save, rate, enroll in and complete.</p></div><a class="btn" href="{{ url_for('register') }}">Create Account</a></div>
+</section>
+{% endif %}
+
+<section class="section">
+<div class="section-heading"><div><span class="eyebrow">DISCOVER</span><h2>Featured Courses</h2></div></div>
+<div class="course-grid">{% for course in featured %}<article class="course-card">
+<div class="course-icon">{{ category_icon(course["category"]) }}</div>
+<div class="course-body">
+<span class="pill">{{ course["category"] }}</span>
+<h3>{{ course["name"] }}</h3>
+<p>{{ course["description"] }}</p>
+<div class="meta"><span>{{ course["difficulty"] or "Beginner" }}</span><span>{{ course["duration"] or "Self-paced" }}</span><span>⭐ {{ "%.1f"|format(course["rating"] or 0) }}</span></div>
+{% if course["recommendation_reason"] is defined %}<div class="reason">🤖 {{ course["recommendation_reason"] }}</div>{% endif %}
+<a class="btn" href="{{ url_for('course_details', course_id=course['course_id']) }}">View Course</a>
+</div>
+</article>{% endfor %}</div>
+</section>
+{% endblock %}
